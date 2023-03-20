@@ -5,190 +5,195 @@ import Products from "../model/product.model"
 
 import { pro_storage } from "../multer/mult"
 
-export const allproCategories =async (req,res)=>{
-    try{
-       
-    
+export const allproCategories = async (req, res) => {
+    try {
+
+
         const data = await Products.find().populate("category")
-        const  fil_cat = data.map((v)=>{
-            return v.category.category 
+        const fil_cat = data.map((v) => {
+            return v.category.category
         })
-       if(fil_cat){
-        res.status(200).json({
-            data:fil_cat,
-            message:"successfully fetched"
-        })
-       }
-      else{
-            res.status(404).json({
-                message:"something went wrong"
-            })
-        }
-    
-    
-    }catch(err){
-        res.status(500).json({
-            message:err.message
-        })
-    
-        }
-
-}
-
-export const proCategories = async (req,res)=>{
-    try{
-                const cat = req.params.ids
-            
-                const data = await Products.find().populate("category")
-                const  fil_cat = data.filter((v)=>{
-                    return v.category.category == cat
-                })
-               if(fil_cat){
-                res.status(200).json({
-                    data:fil_cat,
-                    message:"successfully fetched"
-                })
-               }
-              else{
-                    res.status(404).json({
-                        message:"something went wrong"
-                    })
-                }
-            
-            
-            }catch(err){
-                res.status(500).json({
-                    message:err.message
-                })
-            
-                }
-}
-
-export const getProduct = async (req,res)=>{
-    try{
-        const find = await Products.findOne({id:req.params.ids}).populate("category")
-        if(find){
+        if (fil_cat) {
             res.status(200).json({
-                data:find,
-                message:"successfully fetched"
+                data: fil_cat,
+                message: "successfully fetched"
             })
-        }else
-        {
+        }
+        else {
             res.status(404).json({
-                message:"not found"
+                message: "something went wrong"
+            })
+        }
+
+
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        })
+
+    }
+
+}
+
+export const proCategories = async (req, res) => {
+    try {
+        const cat = req.params.ids
+
+        const data = await Products.find().populate("category")
+        const fil_cat = data.filter((v) => {
+            return v.category.category == cat
+        })
+        if (fil_cat) {
+            res.status(200).json({
+                data: fil_cat,
+                message: "successfully fetched"
+            })
+        }
+        else {
+            res.status(404).json({
+                message: "something went wrong"
+            })
+        }
+
+
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        })
+
+    }
+}
+
+export const getProduct = async (req, res) => {
+    try {
+        const find = await Products.findOne({ id: req.params.ids }).populate("category")
+        if (find) {
+            res.status(200).json({
+                data: find,
+                message: "successfully fetched"
+            })
+        } else {
+            res.status(404).json({
+                message: "not found"
             })
         }
 
 
 
-    }catch(err){
+    } catch (err) {
         res.status(500).json({
-            message:err.message
+            message: err.message
         })
     }
 }
 
-export const getProducts = async(req,res)=>{
-    try{let products;
+export const getProducts = async (req, res) => {
+    try {
+        let products;
         let spl;
-         const {limit,skip,select} = req.query
-        if(limit|| skip || select){
-            
-           
-         if(select){   spl = select.split(",").join(" ") }    
-            products =  await Products.find().limit(limit).skip(skip).select(spl).populate("category")
+        const { limit, skip, select } = req.query
+        if (limit || skip || select) {
+
+
+            if (select) { spl = select.split(",").join(" ") }
+            products = await Products.find().limit(limit).skip(skip).select(spl).populate("category")
 
         }
-       else{  products =  await Products.find().populate("category")}
+        else { products = await Products.find().populate("category") }
 
-        if(products){
+        if (products) {
             res.status(200).json({
-                data:products,
-                message:"successfully fetched"
+                data: products,
+                message: "successfully fetched"
             })
-        }else{
+        } else {
             res.status(404).json({
-                message:"not found"
+                message: "not found"
             })
         }
-    }catch(err){
+    } catch (err) {
         res.status(500).json({
-            message:err.message
+            message: err.message
         })
     }
 
 }
 
-export const searchProducts= async (req,res)=>{
-    try{
-        const {p} = req.query
+export const searchProducts = async (req, res) => {
+    try {
+        const { p } = req.query
         console.log(p)
-        let searchPro ;
-     
+        let searchPro;
 
-  
-            searchPro = await Products.find({ $or: [
+
+
+        searchPro = await Products.find({
+            $or: [
                 { title: { $regex: `.*${p}.*`, $options: "i" } },
                 { description: { $regex: `.*${p}.*`, $options: "i" } },
-              ]}
-              ).populate("category")
-             
-    
-        
-        if(searchPro){
+            ]
+        }
+        ).populate("category")
+
+
+
+        if (searchPro) {
             res.status(200).json({
-                data:searchPro,
-                message:"successfully fetched"
+                data: searchPro,
+                message: "successfully fetched"
             })
-        }else{
+        } else {
             res.status(404).json({
-                message:"not found"
+                message: "not found"
             })
         }
 
 
-    }catch(err){
+    } catch (err) {
         res.status(500).json({
-            message:err.message
+            message: err.message
         })
     }
 }
 
-export const addProduct = (req,res)=>{
-    try{const   upload =  multer({ storage: pro_storage })
-        const uploadData =upload.single("image")
-        uploadData(req,res, async function(err){
-            if(err){
-               return res.status(400).json({
-                    message:err.message
+export const addProduct = (req, res) => {
+    try {
+        const upload = multer({ storage: pro_storage })
+        const uploadData = upload.single("image")
+        uploadData(req, res, async function (err) {
+            if (err) {
+                return res.status(400).json({
+                    message: err.message
                 })
             }
-            const {id,title,description,price,discountPercentage,rating,stock,brand,category} = req.body
+            const { id, title, description, price, discountPercentage, rating, stock, brand, category } = req.body
             let productData;
-            if(req.file){
+            if (req.file) {
                 const image = req.file.filename
                 console.log(image)
-                productData = new Products({id,
-                    title,description,price,discountPercentage,rating,stock,brand,category,thumbnail:image
+                productData = new Products({
+                    id,
+                    title, description, price, discountPercentage, rating, stock, brand, category, thumbnail: image
 
                 })
             }
-            else{
-                productData = new Products({id,
-                    title,description,price,discountPercentage,rating,stock,brand,category
+            else {
+                productData = new Products({
+                    id,
+                    title, description, price, discountPercentage, rating, stock, brand, category
 
                 })
 
             }
-            const saveData =  await productData.save()
-            if(saveData){
-              return  res.status(201).json({
-                    data:saveData,
-                    message:"successfully inserted"
+            const saveData = await productData.save()
+            if (saveData) {
+                return res.status(201).json({
+                    data: saveData,
+                    message: "successfully inserted"
                 })
-            }else{
-             return   res.status(400).json({
-                    message:"something went wrong"
+            } else {
+                return res.status(400).json({
+                    message: "something went wrong"
                 })
             }
 
@@ -200,44 +205,45 @@ export const addProduct = (req,res)=>{
 
 
 
-    }catch(err){
-      return  res.status(500).json({
-            message:err.message
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
         })
     }
 }
 
- export  const updateProducts = (req,res)=>{
-    try{
-        const uploadData = product_upload.single("image")
-        uploadData(req,res,async function(err){
-            if(err){
+export const updateProducts = (req, res) => {
+    try {
+        const upload = multer({ storage: pro_storage })
+        const uploadData = upload.single("image")
+        uploadData(req, res, async function (err) {
+            if (err) {
                 return res.status(400).json({
-                    message:err
+                    message: err
                 })
             }
-            const old_data = await Products.findOne({id:req.params.ids})
+            const old_data = await Products.findOne({ id: req.params.ids })
             let img = old_data.thumbnail
-            if(req.file){
-                fs.unlink(path.join("product.image",img),function(err){
-                    if(err){
+            if (req.file) {
+                fs.unlink(path.join("product.image", img), function (err) {
+                    if (err) {
                         res.status(400).json({
-                            message:"something went wrong"
+                            message: "something went wrong"
                         })
                     }
                 })
                 img = req.file.filename
             }
-            const {id,title,description,price,discountPercentage,rating,stock,brand,category} = req.body
-            const upd = await Products.updateOne({id:req.params.ids},{$set:{id,title,description,price,discountPercentage,rating,stock,brand,category,thumbnail:img}})
+            const { id, title, description, price, discountPercentage, rating, stock, brand, category } = req.body
+            const upd = await Products.updateOne({ id: req.params.ids }, { $set: { id, title, description, price, discountPercentage, rating, stock, brand, category, thumbnail: img } })
 
-            if(upd){
+            if (upd) {
                 res.status(200).json({
-                    data:upd,
-                    message:"successfully updated"
+                    data: upd,
+                    message: "successfully updated"
                 })
             }
-        
+
         })
 
 
@@ -245,50 +251,50 @@ export const addProduct = (req,res)=>{
 
 
 
-    }catch(err){
+    } catch (err) {
         res.status(500).json(
-         {   message:err.message}
+            { message: err.message }
         )
     }
 
 }
 
 
-export const deleteProducts = async (req,res)=>{
-    try{
-        const data = await Products.findOne({id:req.params.ids})
+export const deleteProducts = async (req, res) => {
+    try {
+        const data = await Products.findOne({ id: req.params.ids })
         console.log(data.thumbnail)
 
-        if(fs.existsSync(path.join("product.image",data.thumbnail))){
-            
-            fs.unlink(path.join("product.image",data.thumbnail),function(err){
-                if(err){
+        if (fs.existsSync(path.join("product.image", data.thumbnail))) {
+
+            fs.unlink(path.join("product.image", data.thumbnail), function (err) {
+                if (err) {
                     res.status(400).json({
-                        message:"something went wrong"
+                        message: "something went wrong"
                     })
                 }
             })
 
         }
-      
-     
-     
-      
-      
-        const del = await Products.deleteOne({id:req.params.ids})
-        if(del){
+
+
+
+
+
+        const del = await Products.deleteOne({ id: req.params.ids })
+        if (del) {
             res.status(200).json({
-                data:del,
-                message:"deleted"
+                data: del,
+                message: "deleted"
             })
         }
 
-        
-      
 
-    }catch(err){
+
+
+    } catch (err) {
         res.status(500).json({
-            message:err.message
+            message: err.message
         })
     }
 }

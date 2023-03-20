@@ -14,7 +14,7 @@ export  const getUserCart =async (req,res)=>{
 
         },0) 
         data.product.forEach((v)=>{
-            str+= `${v.name}: ${v.quantity},`
+            str+= `${v.name}: ${v.quantity}`
         })
         console.log(totalPrice)
         if(data){
@@ -80,7 +80,6 @@ export const addCarts = async (req,res)=>{
     try {
         const {productID, userID} = req.body;
         const cart = await Carts.findOne({userID:userID})
-        const many = await Carts.find({userID:userID})
         const product = await Product.findOne({_id: productID});
 
         let addData;
@@ -90,21 +89,12 @@ export const addCarts = async (req,res)=>{
       
         
         if(cart){
-            console.log(cart)
-      
-    
             cart.product.forEach((v)=>{
-                
-              
+
             
             if(v.id == productID){
-                
-            
-              
                 v.quantity++
              v.price+=  product.price
-       
-              
          } 
         else{
             cart.product.push({
@@ -118,9 +108,6 @@ export const addCarts = async (req,res)=>{
         
         }})
         console.log(cart.product)
-        // unique  = cart.product.filter((item,index)=>{
-        //     return cart.product.indexOf(item) === index
-        // })
          unique = cart.product.filter(
             (obj, index) =>
               cart.product.findIndex((item) => item.id === obj.id) === index
@@ -151,11 +138,6 @@ export const addCarts = async (req,res)=>{
       
         }
         addData.save();
-
-     
-
-     
-      
         if (addData) {
          res.status(201).json({
              data: addData,

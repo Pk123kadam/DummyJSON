@@ -92,14 +92,15 @@ export const getProducts = async (req, res) => {
         let products;
         let spl;
         const { limit, skip, select } = req.query
-        if (limit || skip || select) {
 
 
-            if (select) { spl = select.split(",").join(" ") }
-            products = await Products.find().limit(limit).skip(skip).select(spl).populate("category")
 
-        }
-        else { products = await Products.find().populate("category") }
+        if (select) { spl = select.split(",").join(" ") }
+        products = await Products.find().limit(limit).skip(skip).select(spl).populate("category")
+
+
+
+
 
         if (products) {
             res.status(200).json({

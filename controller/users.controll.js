@@ -6,10 +6,13 @@ import path from "path"
 import multer from "multer"
 import { user_storage } from "../multer/mult"
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
+
 
 export const usersTodo = async (req, res) => {
     try {
-        const user_todo = await t_u.find({ userId: req.params.ids })
+        const user_todo = await t_u.findOne({ userId: req.params.ids }).populate("userId")
+
 
         if (user_todo) {
             res.status(200).json({
@@ -215,34 +218,32 @@ export const addUsers = async (req, res) => {
     }
 }
 
-// export const loginUser = async (req, res) => {
-//     try {
-//         const { firstName, lastName } = req.body
-//         const data = await Users.findOne({ firstName: firstName })
-//         if (!data) {
-//             return res.status(400).json({
-//                 message: "User not found"
-//             })
-//         }
-//         const match = await bcrypt.compare(lastName, data.lastName);
-//         if (match) {
-//             return res.status(200).json({
-//                 data: data,
-//                 message: "Login successful"
-//             })
-//         } else {
-//             return res.status(400).json({
-//                 message: "Invalid credentials"
-//             })
-//         }
+export const loginUser = async (req, res) => {
+    try {
+        const { firstName, lastName } = req.body
+        const data = await Users.findOne({ firstName: firstName, lastName: lastName })
 
 
-//     } catch (err) {
-//         res.status(500).json({
-//             message: err.message
-//         })
-//     }
-// }
+        if (!data) {
+            return res.status(400).json({
+                message: "User not found"
+            })
+        }
+        else {
+            const token = jwt.sign({ data }, "secret")
+            return res
+                .cookie("access_token", token).status(200)
+                .json({ message: "Logged in successfully 😊 👌" });
+        }
+
+
+
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        })
+    }
+}
 export const updateUser = async (req, res) => {
     try {
         const upload = multer({ storage: user_storage })

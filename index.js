@@ -6,11 +6,13 @@ import catRoute from "./routes/category.route"
 import cartRoute from "./routes/cart.route"
 import usersRoute from "./routes/users.route"
 import todoRoute from "./routes/todo.route."
+import cookieParser from "cookie-parser"
 mongoose.set('strictQuery', true);
 
 mongoose.connect('mongodb://127.0.0.1:27017/dummydatabase').then(() => console.log('Connected!'));
 
 const app = express()
+app.use(cookieParser())
 
 app.use(express.static(__dirname))
 

@@ -1,5 +1,6 @@
 import Carts from "../model/cart.model"
 import Product from "../model/product.model"
+import axios from "axios"
 
 
 
@@ -116,41 +117,29 @@ export const getCart = async (req, res) => {
 export const addCarts = async (req, res) => {
     try {
         let upd;
-        let inc;
+        let inc
+
         const { userID, productID } = req.body
-        const data = await Carts.find({ userID: userID })
-        let increase = data.filter((e) => {
-            return e.product.id == productID
-        })
+        const data = await Carts.findOne({ $and: [{ userID: userID }, { id: productID }] })
+
         const product = await Product.findOne({ _id: productID })
+        data ?
 
-        data.length !== 0 ?
+            inc = await Carts.updateOne({ userID: userID }, { $inc: { quantity: 1, price: product.price } })
 
-            increase.length !== 0 ? inc = await Carts.updateOne({ userID: userID, "product.id": productID }, { $inc: { "product.quantity": 1, "product.price": product.price } })
-                : upd = new Carts({
-                    product: {
-                        id: product._id,
-                        name: product.title,
-                        thumbnail: product.thumbnail,
-                        quantity: 1,
-                        price: product.price,
-                    },
-                    userID: userID
+            : upd = new Carts({
 
-                })
+                id: product._id,
+                name: product.title,
+                thumbnail: product.thumbnail,
 
-            :
-            upd = new Carts({
-                product: {
-                    id: product._id,
-                    name: product.title,
-                    thumbnail: product.thumbnail,
-                    quantity: 1,
-                    price: product.price,
-                },
+                price: product.price,
+                quantity: 1,
+
                 userID: userID
 
             })
+
 
             ;
         if (upd) {
@@ -161,11 +150,13 @@ export const addCarts = async (req, res) => {
             })
         }
         if (inc) {
-            return res.status(200).json({
+
+            return res.status(201).json({
                 data: inc,
-                message: "updated"
+                message: 'successfully created'
             })
         }
+
 
         else {
             return res.status(400).json({
@@ -187,23 +178,28 @@ export const updateCart = async (req, res) => {
     try {
         let dec;
         const { productID, userID } = req.query;
-        const data = await Carts.find({ userID: userID })
+        const data = await Carts.find({ userID: userID, id: productID })
         const product = await Product.findOne({ productID: productID })
 
+        data ?
 
-        let increase = data.filter((e) => {
-            return e.product.id == productID
-        })
+            dec = await Carts.updateOne({ userID: userID }, { $inc: { quantity: -1, price: -product.price } }) : null
 
-        increase.length !== 0 ? dec = await Carts.updateOne({ userID: userID, "product.id": productID }, { $inc: { "product.quantity": -1, "product.price": -product.price } }) : null
+
+
+
+
+        await Carts.deleteOne({ $and: [{ userID: userID }, { quantity: 0 }] })
+
+
         if (dec) {
-            res.status(201).json({
+            return res.status(201).json({
                 data: dec,
                 message: 'updated successfully :)'
             })
         } else {
-            res.status(400).json({
-                message: 'Error :('
+            return res.status(400).json({
+                message: ' deleted'
             });
         }
     } catch (error) {
@@ -280,7 +276,7 @@ export const deleteCarts = async (req, res) => {
 
         const { userID, productID } = req.query
 
-        let del = await Carts.deleteOne({ userID: userID }, { "product.id": productID })
+        let del = await Carts.deleteOne({ $and: [{ userID: userID }, { id: productID }] })
         if (del) {
             res.status(200).json({
                 message: "deleted",
@@ -298,4 +294,13 @@ export const deleteCarts = async (req, res) => {
         })
     }
 }
+// 3 party api
+// async function getAllCategories() {
+//     const data = await axios.get("http://localhost:7090/categories")
+//     console.log(data.data.data[0])
+
+
+
+// }
+// getAllCategories()
 
